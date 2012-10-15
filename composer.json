@@ -1,0 +1,13 @@
+{
+    "name": "hiraku/curl",
+    "description": "wrapper for pecl-curl",
+    "authors": [
+        {
+            "name": "Hiraku NAKANO",
+            "email": "hiraku@tojiru.net"
+        }
+    ],
+    "require": {
+
+    }
+}
