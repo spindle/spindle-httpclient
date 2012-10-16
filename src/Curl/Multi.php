@@ -1,12 +1,12 @@
 <?php
 namespace Curl;
 
-class RequestPool extends Base implements \Iterator
+class Multi extends Base implements \Iterator
 {
     protected
         $mh
       , $timeout = 10
-      , $pool = array()  //Request $req -> $req;
+      , $pool = array()
       , $_valid //for iterator
     ;
 
@@ -28,13 +28,13 @@ class RequestPool extends Base implements \Iterator
     }
 
     function attach(Request $req) {
-        $this->pool[spl_object_hash($req)] = $req;
+        $this->pool[(int)$req->handle] = $req;
 
         curl_multi_add_handle($this->mh, $req->handle);
     }
 
     function detach(Request $req) {
-        unset($this->pool[spl_object_hash($req)]);
+        unset($this->pool[(int)$req->handle]);
 
         curl_multi_remove_handle($this->mh, $req->handle);
     }
@@ -42,7 +42,11 @@ class RequestPool extends Base implements \Iterator
     function sendStart() {
         $mh = $this->mh;
 
-        $stat = curl_multi_exec($mh, $running);
+        //for libcurl < 7.20
+        do {
+            $stat = curl_multi_exec($mh, $running);
+        } while ($stat === CURLM_CALL_MULTI_PERFORM);
+
         if (! $running || $stat !== CURLM_OK) {
             throw new \RuntimeException('request cannot start');
         }
@@ -55,18 +59,22 @@ class RequestPool extends Base implements \Iterator
 
         do switch (curl_multi_select($mh, $this->timeout)) {
             case -1:
+                throw new \RuntimeException('select failed.');
             case 0:
                 throw new \RuntimeException('timeout.');
 
             default:
-                $stat = curl_multi_exec($mh, $running);
+                //for libcurl < 7.20
+                do {
+                    $stat = curl_multi_exec($mh, $running);
+                } while ($stat === CURLM_CALL_MULTI_PERFORM);
 
                 do if ($raised = curl_multi_info_read($mh, $remains)) {
                     $info = curl_getinfo($raised['handle']);
                     $body = curl_multi_getcontent($raised['handle']);
 
                     $response = new Response($body, $info);
-                    $request = $this->_searchRequestByHandle($raised['handle']);
+                    $request = $this->pool[(int)$raised['handle']];
 
                     if (isset($request->processor)) {
                         $response = call_user_func($request->processor, $response);
@@ -96,16 +104,6 @@ class RequestPool extends Base implements \Iterator
 
     function stop() {
         return $this->detachAll();
-    }
-
-    protected function _searchRequestByHandle($ch) {
-        foreach ($this->pool as $req) {
-            if ($req->handle === $ch) {
-                return $req;
-            }
-        }
-
-        throw new \RuntimeException('The handle is not found.');
     }
 
     //for iterator
