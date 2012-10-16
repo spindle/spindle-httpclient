@@ -12,22 +12,23 @@ class Request extends Base
 
     protected $response;
 
-    function __construct($prototype = null) {
-        if ($prototype instanceof self) {
-            $this->handle = curl_copy_handle($prototype->handle);
-            $this->options = $prototype->options;
-        } elseif (is_string($prototype)) {
-            $this->handle = curl_init($prototype);
+    function __construct($url = null, array $options = array()) {
+        if (is_string($url)) {
+            $this->handle = curl_init($url);
         } else {
             $this->handle = curl_init();
         }
 
-        curl_setopt($this->handle, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($this->handle, CURLOPT_HEADER, true);
+        $this->options += $options;
+        $this->setOptions($this->options);
     }
 
     function __destruct() {
         curl_close($this->handle);
+    }
+
+    function __clone() {
+        $this->handle = curl_copy_handle($this->handle);
     }
 
     function setOptions(array $options) {
