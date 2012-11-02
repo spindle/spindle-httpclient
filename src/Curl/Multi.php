@@ -93,7 +93,6 @@ class Multi extends Base implements \Iterator
         $this->waitResponse();
     }
 
-    //全部消す。
     function detachAll() {
         foreach ($this->pool as $request) {
             curl_multi_remove_handle($this->mh, $request->handle);
