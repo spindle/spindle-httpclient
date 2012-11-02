@@ -13,8 +13,10 @@ $request = new Curl\Request('http://example.com/api', array(
 
 $response = $request->send();
 
-$header = $response->getHeaderString();
-$body = $response->getBody();
+$statusCode = $response->getStatusCode();
+$header     = $response->getHeaderString();
+$body       = $response->getBody();
+$body       = (string)$response;
 ```
 
 ```php
@@ -86,7 +88,7 @@ $req->setOptions(array(
 ## Curl\Response
 レスポンスのWrapperです。
 
-### integer getCode()
+### int getStatusCode()
 HTTPのステータスコードを返します。
 
 ### string getUrl()
@@ -98,12 +100,15 @@ HTTPのステータスコードを返します。
 ### string getContentLength()
 レスポンスのContent-Lengthを返します。
 
+### mixed getInfo(string $label)
+curl_getinfo()のラッパーです。
+
 ### string getHeaderString()
 レスポンスヘッダーの文字列を返します。
 
-### string getHeader(string $headerName)
+### mixed getHeader(string $headerName)
 $headerNameに対応するレスポンスヘッダーの中身を返します。
-getHeader()と$headerNameを省略すると、レスポンスヘッダーを連想配列形式で返します。
+$headerNameを省略すると、レスポンスヘッダーを連想配列形式で返します。
 
 ### string getBody()
 レスポンスボディの文字列を返します。

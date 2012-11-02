@@ -3,18 +3,18 @@ namespace Curl;
 
 class Response {
     protected
-        $_body = ''
-      , $_header = ''
-      , $_info
-      , $_headerCache
+        $body = ''
+      , $header = ''
+      , $info
+      , $headerCache
       ;
 
     function __construct($body, array $info) {
         if (is_string($body)) {
-            $this->_header = substr($body, 0, $info['header_size']);
-            $this->_body = substr($body, $info['header_size']);
+            $this->header = substr($body, 0, $info['header_size']);
+            $this->body = substr($body, $info['header_size']);
         }
-        $this->_info = $info;
+        $this->info = $info;
     }
 
     function __toString() {
@@ -22,12 +22,12 @@ class Response {
     }
 
     function getHeaderString() {
-        return $this->_header;
+        return $this->header;
     }
 
     function getHeader($label = null) {
-        if (! $this->_headerCache) {
-            $headerString = trim($this->_header);
+        if (! $this->headerCache) {
+            $headerString = trim($this->header);
             $headerString = str_replace(array("\r\n", "\r"), "\n", $headerString);
             $headerArr = explode("\n", $headerString);
             $stat = array_shift($headerArr);
@@ -40,33 +40,40 @@ class Response {
                 $result[trim($key)] = trim($value);
             }
 
-            $this->_headerCache = $result;
+            $this->headerCache = $result;
         }
 
         if ($label) {
-            return isset($this->_headerCache[$label]) ? $this->_headerCache[$label] : null;
+            return isset($this->headerCache[$label]) ? $this->headerCache[$label] : null;
         } else {
-            return $this->_headerCache;
+            return $this->headerCache;
         }
     }
 
     function getUrl() {
-        return $this->_info['url'];
+        return $this->info['url'];
     }
 
-    function getCode() {
-        return $this->_info['http_code'];
+    function getStatusCode() {
+        return $this->info['http_code'];
     }
 
     function getContentType() {
-        return $this->_info['content_type'];
+        return $this->info['content_type'];
     }
 
     function getContentLength() {
-        return $this->_info['download_content_length'];
+        return $this->info['download_content_length'];
+    }
+
+    function getInfo($label = null) {
+        if ($label && isset($this->info[$label])) {
+            return $this->info[$label];
+        }
+        return $this->info;
     }
 
     function getBody() {
-        return $this->_body;
+        return $this->body;
     }
 }
