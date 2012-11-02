@@ -5,6 +5,8 @@ class Request extends Base
 {
     //inherited ... $handle, $processor
 
+    public $responseClass = '\Curl\Response';
+
     protected $options = array(
         'returnTransfer' => true,
         'header' => true,
@@ -50,7 +52,7 @@ class Request extends Base
     function send() {
         $body = curl_exec($this->handle);
         $info = curl_getinfo($this->handle);
-        $response = new Response($body, $info);
+        $response = new $this->responseClass($body, $info);
 
         if (isset($this->processor)) {
             $response = call_user_func($this->processor, $response);
