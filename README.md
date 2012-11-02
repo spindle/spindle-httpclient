@@ -2,6 +2,7 @@ cURL Wrapper for pecl-curl
 ==========================
 
 curl_*関数をモダンなPHPらしく書けるようにした薄いラッパークラスです。
+curl_multi_*に対応しており、並列リクエストが可能です。
 
 ```php
 $request = new Curl\Request('http://example.com/api', array(
@@ -43,7 +44,7 @@ curl_init()のWrapperです。
 ### __clone()
 Curl\Requestはclone可能です。cloneした場合、オプションなどがすべてコピーされます。
 
-```
+```php
 $req1 = new Curl\Request('http://example.com/');
 $req2 = clone $req1;
 ```
@@ -112,3 +113,22 @@ $headerNameを省略すると、レスポンスヘッダーを連想配列形式
 
 ### string getBody()
 レスポンスボディの文字列を返します。
+
+
+## Curl\Multi
+curl_multi_*のWrapperです。並列リクエストを行うことができます。
+
+```php
+$pool = new Curl\Multi(
+    new Curl\Request('http://example.com/api'),
+    new Curl\Request('http://example.com/api2')
+);
+$pool->setTimeout(10);
+
+$pool->send(); //wait for all response
+
+foreach ($pool as $req) {
+    $res = $req->getResponse();
+    echo $res->getStatusCode(), PHP_EOL, $res, PHP_EOL;
+}
+```
