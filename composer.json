@@ -15,5 +15,6 @@
         "psr-0": {
             "Curl": "src"
         }
-    }
+    },
+    "license": "MIT"
 }
