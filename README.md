@@ -1,4 +1,4 @@
-cURL Wrapper for pecl-curl
+Simple Wrapper for pecl-curl
 ==========================
 
 curl_*関数をモダンなPHPらしく書けるようにした薄いラッパークラスです。
