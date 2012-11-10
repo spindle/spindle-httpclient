@@ -127,8 +127,23 @@ $pool->setTimeout(10);
 
 $pool->send(); //wait for all response
 
-foreach ($pool as $req) {
+foreach ($pool as $url => $req) {
     $res = $req->getResponse();
-    echo $res->getStatusCode(), PHP_EOL, $res, PHP_EOL;
+    echo $url, PHP_EOL;
+    echo $res->getStatusCode(), PHP_EOL
+    echo $res->getBody(), PHP_EOL;
 }
+```
+
+```php
+$pool = new Curl\Multi;
+$req1 = new Curl\Request('http://example.com/api1');
+$req2 = new Curl\Request('http://example.com/api2');
+
+$pool->attach($req1);
+$pool->attach($req2);
+
+$pool->detach($req1);
+
+$pool->send();
 ```
