@@ -17,6 +17,7 @@ class Request extends Base
     function __construct($url = null, array $options = array()) {
         if (is_string($url)) {
             $this->handle = curl_init($url);
+            $options['url'] = $url;
         } else {
             $this->handle = curl_init();
         }
@@ -95,11 +96,14 @@ class Request extends Base
 
         if (is_string($label)) {
             $const = 'CURLOPT_' . strtoupper($label);
-            $curlopt = constant($const);
-            if ($curlopt === null) {
+            if (defined($const)) {
+                $curlopt = constant($const);
+            } else {
                 throw new \InvalidArgumentException("$label does not exist in CURLOPT_* constants.");
             }
             return $curlopt;
         }
+
+        throw new \InvalidArgumentException('label is invalid');
     }
 }

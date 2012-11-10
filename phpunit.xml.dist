@@ -2,6 +2,11 @@
 <phpunit
   colors="true"
   bootstrap="vendor/autoload.php">
+  <filter>
+    <blacklist>
+      <directory suffix=".php">vendor/</directory>
+    </blacklist>
+  </filter>
   <testsuite name="Curl Test Suite">
     <directory>test/</directory>
   </testsuite>
