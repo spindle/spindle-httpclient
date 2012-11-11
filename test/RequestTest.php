@@ -57,7 +57,7 @@ class RequestTest extends PHPUnit_Framework_TestCase
         $res = $req->send();
         $this->assertEquals('application/xml', $res->getHeader('Content-Type'));
 
-        $req->setProcessor(static function($res){
+        $req->setProcessor(function($res){
             return simplexml_load_string($res->getBody());
         });
         $req->send();
