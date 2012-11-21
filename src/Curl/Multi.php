@@ -1,7 +1,7 @@
 <?php
 namespace Curl;
 
-class Multi extends Base implements \Iterator
+class Multi extends Base implements \IteratorAggregate
 {
     protected
         $mh
@@ -105,30 +105,8 @@ class Multi extends Base implements \Iterator
         return $this->detachAll();
     }
 
-    //for iterator
-    function rewind() {
-        reset($this->pool);
-        $this->_valid = true;
+    //for IteratorAggregate
+    function getIterator() {
+        return new \ArrayIterator($this->pool);
     }
-
-    function current() {
-        return current($this->pool);
-    }
-
-    function key() {
-        $req = current($this->pool);
-        return $req->getResponse()->getUrl();
-    }
-
-    function next() {
-        $next = next($this->pool);
-        if ($next === false) {
-            $this->_valid = false;
-        }
-    }
-
-    function valid() {
-        return $this->_valid;
-    }
-
 }
