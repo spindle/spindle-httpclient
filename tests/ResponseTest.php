@@ -21,16 +21,16 @@ _HTTP_;
         );
         $res = new Curl\Response($sampleResponse, $sampleInfo);
 
-        $this->assertInstanceOf('\Curl\Response', $res);
-        $this->assertEquals('simple', (string)$res);
-        $this->assertEquals('simple', $res->getBody());
+        assertInstanceOf('\Curl\Response', $res);
+        assertEquals('simple', (string)$res);
+        assertEquals('simple', $res->getBody());
         $header = array(
             'HTTP/1.1 200 OK',
             'Content-Type: text/plain',
             '', '',
         );
 
-        $this->assertEquals(implode("\n", $header), $res->getHeaderString());
+        assertEquals(implode("\n", $header), $res->getHeaderString());
 
         return $res;
     }
@@ -40,11 +40,11 @@ _HTTP_;
      */
     function testHeaderParser(Curl\Response $res)
     {
-        $this->assertEquals('text/plain', $res->getHeader('Content-Type'));
-        $this->assertSame(array('Content-Type' => 'text/plain'), $res->getHeader());
+        assertEquals('text/plain', $res->getHeader('Content-Type'));
+        assertSame(array('Content-Type' => 'text/plain'), $res->getHeader());
 
         //2回目はキャッシュから返すので2度テストする
-        $this->assertEquals('text/plain', $res->getHeader('Content-Type'));
+        assertEquals('text/plain', $res->getHeader('Content-Type'));
 
         return $res;
     }
@@ -54,12 +54,12 @@ _HTTP_;
      */
     function testInfo(Curl\Response $res)
     {
-        $this->assertEquals(200, $res->getStatusCode());
-        $this->assertEquals('text/plain', $res->getContentType());
-        $this->assertEquals('http://localhost:1337/simple', $res->getUrl());
-        $this->assertEquals(6, $res->getContentLength());
-        $this->assertEquals(200, $res->getInfo('http_code'));
-        $this->assertSame(array(
+        assertEquals(200, $res->getStatusCode());
+        assertEquals('text/plain', $res->getContentType());
+        assertEquals('http://localhost:1337/simple', $res->getUrl());
+        assertEquals(6, $res->getContentLength());
+        assertEquals(200, $res->getInfo('http_code'));
+        assertSame(array(
             'url' => 'http://localhost:1337/simple',
             'content_type' => 'text/plain',
             'http_code' => 200,

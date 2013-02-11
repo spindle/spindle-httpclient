@@ -6,26 +6,26 @@ class RequestTest extends PHPUnit_Framework_TestCase
     function testSimpleRequest() {
         $req = new Curl\Request(self::ORIGIN . '/simple');
         $res = $req->send();
-        $this->assertInstanceOf('\Curl\Response', $res);
-        $this->assertEquals('simple', $res->getBody());
+        assertInstanceOf('\Curl\Response', $res);
+        assertEquals('simple', $res->getBody());
 
         $req = new Curl\Request();
         $req->setOption('url', self::ORIGIN . '/simple');
         $res = $req->send();
-        $this->assertInstanceOf('\Curl\Response', $res);
-        $this->assertEquals('simple', $res->getBody());
+        assertInstanceOf('\Curl\Response', $res);
+        assertEquals('simple', $res->getBody());
 
         $req = new Curl\Request();
         $req->setOption(CURLOPT_URL, self::ORIGIN . '/simple');
         $res = $req->send();
-        $this->assertInstanceOf('\Curl\Response', $res);
-        $this->assertEquals('simple', $res->getBody());
+        assertInstanceOf('\Curl\Response', $res);
+        assertEquals('simple', $res->getBody());
     }
 
     function testCloneRequest() {
         $req = new Curl\Request(self::ORIGIN . '/simple');
         $req2 = clone $req;
-        $this->assertEquals(self::ORIGIN . '/simple', $req2->getOption('url'));
+        assertEquals(self::ORIGIN . '/simple', $req2->getOption('url'));
     }
 
     /**
@@ -55,7 +55,7 @@ class RequestTest extends PHPUnit_Framework_TestCase
     function testXmlRequest() {
         $req = new Curl\Request(self::ORIGIN . '/simple.xml');
         $res = $req->send();
-        $this->assertEquals('application/xml', $res->getHeader('Content-Type'));
+        assertEquals('application/xml', $res->getHeader('Content-Type'));
 
         $req->setProcessor(function($res){
             return simplexml_load_string($res->getBody());
@@ -63,6 +63,6 @@ class RequestTest extends PHPUnit_Framework_TestCase
         $req->send();
 
         $res = $req->getResponse();
-        $this->assertInstanceOf('SimpleXMLElement', $res);
+        assertInstanceOf('SimpleXMLElement', $res);
     }
 }

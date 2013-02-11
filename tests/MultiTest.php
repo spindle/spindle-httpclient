@@ -16,7 +16,7 @@ class MultiTest extends PHPUnit_Framework_TestCase
 
         $m->send();
 
-        $this->assertInstanceOf('SimpleXMLElement', $req->getResponse());
+        assertInstanceOf('SimpleXMLElement', $req->getResponse());
     }
 
     function testParallel() {
@@ -29,11 +29,11 @@ class MultiTest extends PHPUnit_Framework_TestCase
 
         $start = microtime(true);
         $m->send();
-        $this->assertLessThan(4, microtime(true) - $start);
+        assertLessThan(4, microtime(true) - $start);
 
         foreach ($m as $url => $req) {
             $res = $req->getResponse();
-            $this->assertEquals('slow1', $res->getBody());
+            assertEquals('slow1', $res->getBody());
         }
     }
 
