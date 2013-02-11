@@ -10,6 +10,6 @@ How to test
 
 ```
 $ cd path/to/curl
-$ node test/sampleapi.js &
+$ node tests/sampleapi.js &
 $ phpunit
 ```

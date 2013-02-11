@@ -3,11 +3,11 @@
   colors="true"
   bootstrap="vendor/autoload.php">
   <filter>
-    <blacklist>
-      <directory suffix=".php">vendor/</directory>
-    </blacklist>
+    <whitelist>
+      <directory suffix=".php">src/</directory>
+    </whitelist>
   </filter>
   <testsuite name="Curl Test Suite">
-    <directory>test/</directory>
+    <directory>tests/</directory>
   </testsuite>
 </phpunit>
