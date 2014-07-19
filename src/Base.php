@@ -3,7 +3,7 @@
  * パッケージ変数の共有用基底クラス
  *
  */
-namespace Curl;
+namespace Spindle\HttpClient;
 
 class Base {
     protected $handle, $processor;

@@ -1,36 +1,41 @@
 <?php
+namespace Spindle\HttpClient\Tests;
+
+use Spindle\HttpClient;
+
 /**
  * test for Curl\Response
+ * @group response
  */
-class ResponseTest extends PHPUnit_Framework_TestCase
+class ResponseTest extends \PHPUnit_Framework_TestCase
 {
     function testConstruct()
     {
-        $sampleResponse =<<<'_HTTP_'
-HTTP/1.1 200 OK
-Content-Type: text/plain
-
-simple
+        $sampleResponse =<<<_HTTP_
+HTTP/1.1 200 OK\r
+Content-Type: text/plain\r
+\r
+0
 _HTTP_;
         $sampleInfo = array(
-            'url' => 'http://localhost:1337/simple',
+            'url' => 'http://localhost:1337/?wait=0',
             'content_type' => 'text/plain',
             'http_code' => 200,
-            'header_size' => 42,
+            'header_size' => 45,
             'download_content_length' => 6,
         );
-        $res = new Curl\Response($sampleResponse, $sampleInfo);
+        $res = new HttpClient\Response($sampleResponse, $sampleInfo);
 
-        assertInstanceOf('\Curl\Response', $res);
-        assertEquals('simple', (string)$res);
-        assertEquals('simple', $res->getBody());
+        self::assertInstanceOf('\Spindle\HttpClient\Response', $res);
+        self::assertSame('0', (string)$res);
+        self::assertSame('0', $res->getBody());
         $header = array(
             'HTTP/1.1 200 OK',
             'Content-Type: text/plain',
             '', '',
         );
 
-        assertEquals(implode("\n", $header), $res->getHeaderString());
+        self::assertSame(implode("\r\n", $header), $res->getHeaderString());
 
         return $res;
     }
@@ -38,13 +43,13 @@ _HTTP_;
     /**
      * @depends testConstruct
      */
-    function testHeaderParser(Curl\Response $res)
+    function testHeaderParser(HttpClient\Response $res)
     {
-        assertEquals('text/plain', $res->getHeader('Content-Type'));
-        assertSame(array('Content-Type' => 'text/plain'), $res->getHeader());
+        self::assertSame('text/plain', $res->getHeader('Content-Type'));
+        self::assertSame(array('Content-Type' => 'text/plain'), $res->getHeader());
 
         //2回目はキャッシュから返すので2度テストする
-        assertEquals('text/plain', $res->getHeader('Content-Type'));
+        self::assertSame('text/plain', $res->getHeader('Content-Type'));
 
         return $res;
     }
@@ -52,18 +57,18 @@ _HTTP_;
     /**
      * @depends testHeaderParser
      */
-    function testInfo(Curl\Response $res)
+    function testInfo(HttpClient\Response $res)
     {
-        assertEquals(200, $res->getStatusCode());
-        assertEquals('text/plain', $res->getContentType());
-        assertEquals('http://localhost:1337/simple', $res->getUrl());
-        assertEquals(6, $res->getContentLength());
-        assertEquals(200, $res->getInfo('http_code'));
-        assertSame(array(
-            'url' => 'http://localhost:1337/simple',
+        self::assertSame(200, $res->getStatusCode());
+        self::assertSame('text/plain', $res->getContentType());
+        self::assertSame('http://localhost:1337/?wait=0', $res->getUrl());
+        self::assertSame(6, $res->getContentLength());
+        self::assertSame(200, $res->getInfo('http_code'));
+        self::assertSame(array(
+            'url' => 'http://localhost:1337/?wait=0',
             'content_type' => 'text/plain',
             'http_code' => 200,
-            'header_size' => 42,
+            'header_size' => 45,
             'download_content_length' => 6,
         ), $res->getInfo());
     }

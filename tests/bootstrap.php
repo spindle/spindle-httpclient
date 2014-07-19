@@ -1,5 +1,18 @@
 <?php
-$path = realpath(__DIR__ . '/../');
+require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-require_once $path . '/vendor/autoload.php';
-require_once 'PHPUnit/Framework/Assert/Functions.php';
+// start test server
+execInBackground('php ' . __DIR__ . '/sampleapi.php');
+
+function execInBackground($cmd) {
+    if (substr(php_uname(), 0, 7) == 'Windows') {
+        pclose(popen('start /B ' . $cmd, 'r'));
+    } else {
+        exec($cmd . ' >/dev/null &');
+    }
+}
+
+register_shutdown_function(function(){
+    $req = new Spindle\HttpClient\Request('http://localhost:1337/?exit=1');
+    $req->send();
+});

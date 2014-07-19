@@ -1,5 +1,5 @@
 <?php
-namespace Curl;
+namespace Spindle\HttpClient;
 
 class Response {
     protected

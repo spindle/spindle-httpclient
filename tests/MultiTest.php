@@ -1,39 +1,29 @@
 <?php
-class MultiTest extends PHPUnit_Framework_TestCase
+namespace Spindle\HttpClient\Tests;
+
+use Spindle\HttpClient;
+
+class MultiTest extends \PHPUnit_Framework_TestCase
 {
     const ORIGIN = 'http://localhost:1337';
 
-    function testXml() {
-        $m = new Curl\Multi;
-
-        $req = new Curl\Request(self::ORIGIN . '/simple.xml');
-        $req->setProcessor(function($res){
-            return simplexml_load_string($res->getBody());
-        });
-        $m->attach($req);
-        $m->detach($req);
-        $m->attach($req);
-
-        $m->send();
-
-        assertInstanceOf('SimpleXMLElement', $req->getResponse());
-    }
-
     function testParallel() {
-        $m = new Curl\Multi;
+        $m = new HttpClient\Multi;
 
-        $m->attach(new Curl\Request(self::ORIGIN.'/slow1'));
-        $m->attach(new Curl\Request(self::ORIGIN.'/slow1'));
-        $m->attach(new Curl\Request(self::ORIGIN.'/slow1'));
-        $m->attach(new Curl\Request(self::ORIGIN.'/slow1'));
+        $m->attach(new HttpClient\Request(self::ORIGIN.'/?wait=1'));
+        $m->attach(new HttpClient\Request(self::ORIGIN.'/?wait=1'));
+        $m->attach(new HttpClient\Request(self::ORIGIN.'/?wait=1'));
+        $m->attach($request = new HttpClient\Request(self::ORIGIN.'/?wait=1'));
+
+        $m->detach($request);
 
         $start = microtime(true);
         $m->send();
-        assertLessThan(4, microtime(true) - $start);
+        self::assertLessThan(3, microtime(true) - $start);
 
         foreach ($m as $url => $req) {
             $res = $req->getResponse();
-            assertEquals('slow1', $res->getBody());
+            self::assertEquals('1', $res->getBody());
         }
     }
 
@@ -41,9 +31,9 @@ class MultiTest extends PHPUnit_Framework_TestCase
      * @expectedException RuntimeException
      */
     function testTimeout() {
-        $m = new Curl\Multi(
-            new Curl\Request(self::ORIGIN . '/slow1'),
-            new Curl\Request(self::ORIGIN . '/slow1')
+        $m = new HttpClient\Multi(
+            new HttpClient\Request(self::ORIGIN . '/?wait=4'),
+            new HttpClient\Request(self::ORIGIN . '/?wait=2')
         );
         $m->setTimeout(1);
 

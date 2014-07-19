@@ -1,5 +1,5 @@
 <?php
-namespace Curl;
+namespace Spindle\HttpClient;
 
 class Multi extends Base implements \IteratorAggregate
 {
@@ -7,7 +7,6 @@ class Multi extends Base implements \IteratorAggregate
         $mh
       , $timeout = 10
       , $pool = array()
-      , $_valid //for iterator
     ;
 
     function __construct() {
@@ -42,16 +41,15 @@ class Multi extends Base implements \IteratorAggregate
     function sendStart() {
         $mh = $this->mh;
 
-        //for libcurl < 7.20
-        do {
-            $stat = curl_multi_exec($mh, $running);
-        } while ($stat === CURLM_CALL_MULTI_PERFORM);
-
-        if (! $running || $stat !== CURLM_OK) {
-            throw new \RuntimeException('request cannot start');
-        }
-
-        return $this;
+        do switch (curl_multi_select($mh, 0)) {
+            case -1:
+                usleep(10);
+                do $stat = curl_multi_exec($mh, $running);
+                while ($stat === \CURLM_CALL_MULTI_PERFORM);
+                continue 2;
+            default:
+                break 2;
+        } while ($running);
     }
 
     function waitResponse() {
@@ -59,15 +57,12 @@ class Multi extends Base implements \IteratorAggregate
 
         do switch (curl_multi_select($mh, $this->timeout)) {
             case -1:
-                throw new \RuntimeException('select failed.');
             case 0:
                 throw new \RuntimeException('timeout.');
 
             default:
-                //for libcurl < 7.20
-                do {
-                    $stat = curl_multi_exec($mh, $running);
-                } while ($stat === CURLM_CALL_MULTI_PERFORM);
+                do $stat = curl_multi_exec($mh, $running);
+                while ($stat === \CURLM_CALL_MULTI_PERFORM);
 
                 do if ($raised = curl_multi_info_read($mh, $remains)) {
                     $info = curl_getinfo($raised['handle']);
@@ -76,16 +71,10 @@ class Multi extends Base implements \IteratorAggregate
                     $response = new Response($body, $info);
                     $request = $this->pool[(int)$raised['handle']];
 
-                    if (isset($request->processor)) {
-                        $response = call_user_func($request->processor, $response);
-                    }
-
                     $request->setResponse($response);
 
                 } while ($remains);
         } while ($running);
-
-        return $this;
     }
 
     function send() {
@@ -99,10 +88,6 @@ class Multi extends Base implements \IteratorAggregate
         }
 
         $this->pool = array();
-    }
-
-    function stop() {
-        return $this->detachAll();
     }
 
     //for IteratorAggregate

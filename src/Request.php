@@ -1,11 +1,11 @@
 <?php
-namespace Curl;
+namespace Spindle\HttpClient;
 
 class Request extends Base
 {
     //inherited ... $handle, $processor
 
-    public $responseClass = '\Curl\Response';
+    public $responseClass = '\Spindle\HttpClient\Response';
 
     protected $options = array(
         'returnTransfer' => true,
@@ -53,23 +53,7 @@ class Request extends Base
     function send() {
         $body = curl_exec($this->handle);
         $info = curl_getinfo($this->handle);
-        $response = new $this->responseClass($body, $info);
-
-        if (isset($this->processor)) {
-            $response = call_user_func($this->processor, $response);
-        }
-
-        $this->response = $response;
-
-        return $response;
-    }
-
-    function setProcessor($callback) {
-        if (! is_callable($callback)) {
-            throw new \InvalidArgumentException('is not callable');
-        }
-
-        $this->processor = $callback;
+        return $this->response = new $this->responseClass($body, $info);
     }
 
     function setResponse($res) {
