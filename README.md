@@ -1,11 +1,11 @@
-Simple Wrapper for pecl-curl
+spindle\httpclient
 ==========================
 
-curl_*関数をモダンなPHPらしく書けるようにした薄いラッパークラスです。
-curl_multi_*に対応しており、並列リクエストが可能です。
+curl\_\*関数をモダンなPHPらしく書けるようにした薄いラッパークラスです。
+curl\_multi\_\*に対応しており、並列リクエストが可能です。
 
 ```php
-$request = new Curl\Request('http://example.com/api', array(
+$request = new Spindle\HttpClient\Request('http://example.com/api', array(
   'post' => true,
   'postFields' => http_build_query(array(
     'param' => 'value',
@@ -37,25 +37,25 @@ $response_fulltext = curl_exec($ch);
 curl_close($ch);
 ```
 
-## Curl\Request
-curl_init()のWrapperです。
+## Spindle\HttpClient\Request
+curl\_init()のWrapperです。
 
-### __construct([ $url, [ array $options ] ])
-### __clone()
-Curl\Requestはclone可能です。cloneした場合、オプションなどがすべてコピーされます。
+### \_\_construct([ $url, [ array $options ] ])
+### \_\_clone()
+Spindle\HttpClient\Requestはclone可能です。cloneした場合、オプションなどがすべてコピーされます。
 
 ```php
-$req1 = new Curl\Request('http://example.com/');
+$req1 = new Spindle\HttpClient\Request('http://example.com/');
 $req2 = clone $req1;
 ```
 
 ### void setOption($label, $value)
-curl_setopt()のラッパーです。
-デフォルトでCURLOPT_RETURNTFANSFERとCURLOPT_HEADERはtrueに設定されているため、改めてセットする必要はありません。
-CURLOPT_定数は、文字列でも書くことができます。
+`curl_setopt()`のラッパーです。
+デフォルトで`CURLOPT_RETURNTFANSFER`と`CURLOPT_HEADER`はtrueに設定されているため、改めてセットする必要はありません。
+`CURLOPT_`定数は、文字列でも書くことができます。
 
 ```php
-$req = new Curl\Request();
+$req = new Spindle\HttpClient\Request;
 
 //equals
 $req->setOption(CURLOPT_POST, true);
@@ -66,27 +66,27 @@ $req->setOption(CURLOPT_POSTFIELDS, 'a=b');
 $req->setOption('postFields', 'a=b');
 ```
 
-文字列がラベルに指定された場合、全て大文字にして、CURLOPT_をくっつけてから該当する定数を探します。
+文字列がラベルに指定された場合、全て大文字にして、`CURLOPT_`をくっつけてから該当する定数を探します。
 
 ### void setOptions(array $options)
-curl_setopt_array()のラッパーです。setOption()と同じく、文字列ラベルが使えます。
+`curl_setopt_array()`のラッパーです。setOption()と同じく、文字列ラベルが使えます。
 
 ```php
-$req = new Curl\Request();
+$req = new Spindle\HttpClient\Request();
 $req->setOptions(array(
   'post' => true,
   'postFields' => 'a=b',
 ));
 ```
 
-### Curl\Response send()
+### Spindle\HttpClient\Response send()
 リクエストを送信し、レスポンスが返るまで待ちます。
 
-### Curl\Response getResponse()
+### Spindle\HttpClient\Response getResponse()
 最後に取得したレスポンスを返します。
 
 
-## Curl\Response
+## Spindle\HttpClient\Response
 レスポンスのWrapperです。
 
 ### int getStatusCode()
@@ -102,12 +102,12 @@ HTTPのステータスコードを返します。
 レスポンスのContent-Lengthを返します。
 
 ### mixed getInfo(string $label)
-curl_getinfo()のラッパーです。
+`curl_getinfo()`のラッパーです。
 
 ### string getHeaderString()
 レスポンスヘッダーの文字列を返します。
 
-### mixed getHeader(string $headerName)
+### mixed getHeader(string $headerName = null)
 $headerNameに対応するレスポンスヘッダーの中身を返します。
 $headerNameを省略すると、レスポンスヘッダーを連想配列形式で返します。
 
@@ -115,13 +115,15 @@ $headerNameを省略すると、レスポンスヘッダーを連想配列形式
 レスポンスボディの文字列を返します。
 
 
-## Curl\Multi
-curl_multi_*のWrapperです。並列リクエストを行うことができます。
+## Spindle\HttpClient\Multi
+`curl_multi_*`のWrapperです。並列リクエストを行うことができます。
 
 ```php
-$pool = new Curl\Multi(
-    new Curl\Request('http://example.com/api'),
-    new Curl\Request('http://example.com/api2')
+use Spindle\HttpClient;
+
+$pool = new HttpClient\Multi(
+    new HttpClient\Request('http://example.com/api'),
+    new HttpClient\Request('http://example.com/api2')
 );
 $pool->setTimeout(10);
 
@@ -136,9 +138,11 @@ foreach ($pool as $url => $req) {
 ```
 
 ```php
-$pool = new Curl\Multi;
-$req1 = new Curl\Request('http://example.com/api1');
-$req2 = new Curl\Request('http://example.com/api2');
+use Spindle\HttpClient;
+
+$pool = new HttpClient\Multi;
+$req1 = new HttpClient\Request('http://example.com/api1');
+$req2 = new HttpClient\Request('http://example.com/api2');
 
 $pool->attach($req1);
 $pool->attach($req2);
@@ -146,4 +150,30 @@ $pool->attach($req2);
 $pool->detach($req1);
 
 $pool->send();
+```
+
+`send()`は全てのリクエストを送り、全てのレスポンスが戻ってくるのを待ちますが、これを`sendStart()`と`waitResponse()`の二つに分けて書くと、待っている間に他のコードを実行できます。
+
+```php
+use Spindle\HttpClient;
+
+$pool = new HttpClient\Multi(
+    new HttpClient\Request('http://example.com/api'),
+    new HttpClient\Request('http://example.com/api2')
+);
+
+$pool->sendStart();
+
+for ($i=0; $i<10000; $i++) {
+    very_very_heavy_function();
+}
+
+$pool->waitResponse();
+
+foreach ($pool as $url => $req) {
+    $res = $req->getResponse();
+    echo $url, PHP_EOL;
+    echo $res->getStatusCode(), PHP_EOL
+    echo $res->getBody(), PHP_EOL;
+}
 ```
