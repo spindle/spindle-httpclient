@@ -1,5 +1,5 @@
 {
-    "name": "spindle/spindle-httpclient",
+    "name": "spindle/httpclient",
     "description": "simple wrapper for ext-curl, multi-request enabled",
     "authors": [
         {
