@@ -42,6 +42,15 @@ for (;;) {
 
     stream_select($read, $write, $except, 1); //block
 
+    // PHP5.3では、readの配列添え字が保存されない
+    if (PHP_VERSION_ID < 50400) {
+        $readfix = array();
+        foreach ($read as $stream) {
+            $readfix[(int)$stream] = $stream;
+        }
+        $read = $readfix;
+    }
+
     if (isset($read[(int)$server])) {
         $connection = stream_socket_accept($server, 30, $peername);
         stream_set_blocking($connection, 0);
@@ -62,8 +71,9 @@ for (;;) {
     }
 
     foreach ($read as $stream) {
-        $requestLine = fgets($stream, 4096);
-        list(, $path,) = explode(' ', rtrim($requestLine));
+        $requestLine = stream_get_line($stream, 4096, "\r\n");
+
+        list(, $path,) = explode(' ', $requestLine);
         parse_str(parse_url($path, PHP_URL_QUERY), $query);
         if (isset($query['exit']) && $query['exit'] === '1') exit;
 
