@@ -1,6 +1,12 @@
 spindle\httpclient
 ==========================
 
+[![Build Status](https://travis-ci.org/spindle/spindle-httpclient.svg?branch=master)](https://travis-ci.org/spindle/spindle-httpclient)
+[![Latest Stable Version](https://poser.pugx.org/spindle/httpclient/v/stable.svg)](https://packagist.org/packages/spindle/httpclient)
+[![Total Downloads](https://poser.pugx.org/spindle/httpclient/downloads.svg)](https://packagist.org/packages/spindle/httpclient)
+[![Latest Unstable Version](https://poser.pugx.org/spindle/httpclient/v/unstable.svg)](https://packagist.org/packages/spindle/httpclient) 
+[![License](https://poser.pugx.org/spindle/httpclient/license.svg)](https://packagist.org/packages/spindle/httpclient)
+
 curl\_\*関数をモダンなPHPらしく書けるようにした薄いラッパークラスです。
 curl\_multi\_\*に対応しており、並列リクエストが可能です。
 
