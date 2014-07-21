@@ -2,6 +2,8 @@ spindle\httpclient
 ==========================
 
 [![Build Status](https://travis-ci.org/spindle/spindle-httpclient.svg?branch=master)](https://travis-ci.org/spindle/spindle-httpclient)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spindle/spindle-httpclient/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/spindle/spindle-httpclient/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/spindle/spindle-httpclient/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/spindle/spindle-httpclient/?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/spindle/httpclient/v/stable.svg)](https://packagist.org/packages/spindle/httpclient)
 [![Total Downloads](https://poser.pugx.org/spindle/httpclient/downloads.svg)](https://packagist.org/packages/spindle/httpclient)
 [![Latest Unstable Version](https://poser.pugx.org/spindle/httpclient/v/unstable.svg)](https://packagist.org/packages/spindle/httpclient) 
