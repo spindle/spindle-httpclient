@@ -27,10 +27,10 @@ class Response {
 
     function getHeader($label = null) {
         if (! $this->headerCache) {
-            $headerString = trim($this->header);
+            $headerString = rtrim($this->header);
             $headerString = str_replace(array("\r\n", "\r"), "\n", $headerString);
             $headerArr = explode("\n", $headerString);
-            $stat = array_shift($headerArr);
+            array_shift($headerArr);
 
             $result = array();
             foreach ($headerArr as $h) {
