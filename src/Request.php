@@ -9,6 +9,7 @@ namespace Spindle\HttpClient;
 class Request
 {
     private $responseClass = '\Spindle\HttpClient\Response';
+    private $handle;
 
     protected $options = array(
         'returnTransfer' => true,
