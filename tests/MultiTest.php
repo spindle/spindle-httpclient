@@ -20,6 +20,7 @@ class MultiTest extends \PHPUnit_Framework_TestCase
         $start = microtime(true);
         $m->send();
         self::assertLessThan(3, microtime(true) - $start);
+        self::assertCount(3, $m);
 
         foreach ($m as $url => $req) {
             $res = $req->getResponse();

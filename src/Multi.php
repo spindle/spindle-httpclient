@@ -1,7 +1,7 @@
 <?php
 namespace Spindle\HttpClient;
 
-class Multi extends Base implements \IteratorAggregate
+class Multi implements \IteratorAggregate, \Countable
 {
     protected
         $mh
@@ -16,29 +16,36 @@ class Multi extends Base implements \IteratorAggregate
         }
     }
 
-    function __destruct() {
+    function __destruct()
+    {
         $this->detachAll();
         curl_multi_close($this->mh);
     }
 
-    function setTimeout($num) {
+    function setTimeout($num)
+    {
         $this->timeout = $num;
         return $this;
     }
 
-    function attach(Request $req) {
-        $this->pool[(int)$req->handle] = $req;
+    function attach(Request $req)
+    {
+        $handle = $req->getHandle();
+        $this->pool[(int)$handle] = $req;
 
-        curl_multi_add_handle($this->mh, $req->handle);
+        curl_multi_add_handle($this->mh, $handle);
     }
 
-    function detach(Request $req) {
-        unset($this->pool[(int)$req->handle]);
+    function detach(Request $req)
+    {
+        $handle = $req->getHandle();
+        unset($this->pool[(int)$handle]);
 
-        curl_multi_remove_handle($this->mh, $req->handle);
+        curl_multi_remove_handle($this->mh, $handle);
     }
 
-    function sendStart() {
+    function sendStart()
+    {
         $mh = $this->mh;
 
         do switch (curl_multi_select($mh, 0)) {
@@ -52,7 +59,8 @@ class Multi extends Base implements \IteratorAggregate
         } while ($running);
     }
 
-    function waitResponse() {
+    function waitResponse()
+    {
         $mh = $this->mh;
 
         do switch (curl_multi_select($mh, $this->timeout)) {
@@ -77,21 +85,34 @@ class Multi extends Base implements \IteratorAggregate
         } while ($running);
     }
 
-    function send() {
+    function send()
+    {
         $this->sendStart();
         $this->waitResponse();
     }
 
-    function detachAll() {
+    function detachAll()
+    {
         foreach ($this->pool as $request) {
-            curl_multi_remove_handle($this->mh, $request->handle);
+            curl_multi_remove_handle($this->mh, $request->getHandle());
         }
 
         $this->pool = array();
     }
 
-    //for IteratorAggregate
-    function getIterator() {
+    /**
+     * @override IteratorAggregate::getIterator
+     */
+    function getIterator()
+    {
         return new \ArrayIterator($this->pool);
+    }
+
+    /**
+     * @override Countable::count
+     */
+    function count()
+    {
+        return count($this->pool);
     }
 }

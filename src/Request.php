@@ -1,11 +1,9 @@
 <?php
 namespace Spindle\HttpClient;
 
-class Request extends Base
+class Request
 {
-    //inherited ... $handle, $processor
-
-    public $responseClass = '\Spindle\HttpClient\Response';
+    private $responseClass = '\Spindle\HttpClient\Response';
 
     protected $options = array(
         'returnTransfer' => true,
@@ -48,6 +46,15 @@ class Request extends Base
 
     function getOption($label) {
         return $this->options[$label];
+    }
+
+    function getOptions() {
+        return $this->options;
+    }
+
+    function getHandle()
+    {
+        return $this->handle;
     }
 
     function send() {
