@@ -1,4 +1,9 @@
 <?php
+/**
+ * spindle/httpclient
+ * @license CC0-1.0 (Public Domain) https://creativecommons.org/publicdomain/zero/1.0/
+ * @see https://github.com/spindle/spindle-httpclient
+ */
 namespace Spindle\HttpClient;
 
 class Multi implements \IteratorAggregate, \Countable
