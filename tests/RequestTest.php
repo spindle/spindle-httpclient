@@ -30,7 +30,11 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $req = new HttpClient\Request(self::ORIGIN . '/?wait=0');
         $req2 = clone $req;
         self::assertSame(self::ORIGIN . '/?wait=0', $req2->getOption('url'));
-        self::assertSame(array('url' => self::ORIGIN . '/?wait=0'), $req2->getOptions());
+        self::assertSame(array(
+            'returnTransfer' => true,
+            'header' => true,
+            'url' => self::ORIGIN . '/?wait=0',
+        ), $req2->getOptions());
     }
 
     /**
