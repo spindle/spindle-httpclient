@@ -63,10 +63,22 @@ class Request
         return $this->handle;
     }
 
+    /**
+     *
+     * @throws CurlException
+     */
     function send() {
         $body = curl_exec($this->handle);
         $info = curl_getinfo($this->handle);
-        return $this->response = new $this->responseClass($body, $info);
+        $this->response = $res = new $this->responseClass($body, $info);
+
+        $errno = curl_errno($this->handle);
+        if (0 !== $errno) {
+            $err = new CurlException(curl_error($this->handle), $errno);
+            $err->setRequest($this);
+            throw $err;
+        }
+        return $res;
     }
 
     function setResponse($res) {

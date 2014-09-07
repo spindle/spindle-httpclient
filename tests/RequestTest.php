@@ -46,6 +46,22 @@ class RequestTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @expectedException Spindle\HttpClient\CurlException
+     */
+    function testInvalidUrl() {
+        $req = new HttpClient\Request('uso800.example.com');
+        $res = $req->send();
+    }
+
+    function testException() {
+        $e = new HttpClient\CurlException('error!', 0);
+        $e->setRequest($req1 = new HttpClient\Request);
+        $req2 = $e->getRequest();
+        self::assertSame($req1, $req2);
+        self::assertNull($e->getResponse());
+    }
+
+    /**
      * @expectedException InvalidArgumentException
      */
     function testSetOptErrorFloat() {

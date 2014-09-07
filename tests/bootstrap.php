@@ -14,5 +14,9 @@ function execInBackground($cmd) {
 
 register_shutdown_function(function(){
     $req = new Spindle\HttpClient\Request('http://localhost:1337/?exit=1');
-    $req->send();
+    try {
+        $req->send();
+    } catch (Spindle\HttpClient\CurlException $e) {
+        // ignore
+    }
 });
