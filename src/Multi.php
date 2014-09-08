@@ -49,7 +49,7 @@ class Multi implements \IteratorAggregate, \Countable
         curl_multi_remove_handle($this->mh, $handle);
     }
 
-    function sendStart()
+    function start()
     {
         $mh = $this->mh;
 
@@ -62,6 +62,41 @@ class Multi implements \IteratorAggregate, \Countable
             default:
                 break 2;
         } while ($running);
+    }
+
+    /**
+     * イベントが発生するのを待って、何かレスポンスが得られればその配列を返す。
+     *
+     * @return Request[]
+     */
+    function getFinishedResponses()
+    {
+        $mh = $this->mh;
+        $requests = array();
+
+        switch (curl_multi_select($mh, $this->timeout)) {
+            case -1:
+            case 0:
+                throw new \RuntimeException('timeout?');
+
+            default:
+                do $stat = curl_multi_exec($mh, $running);
+                while ($stat === \CURLM_CALL_MULTI_PERFORM);
+
+                do if ($raised = curl_multi_info_read($mh, $remains)) {
+                    $info = curl_getinfo($raised['handle']);
+                    $body = curl_multi_getcontent($raised['handle']);
+
+                    $response = new Response($body, $info);
+                    $request = $this->pool[(int)$raised['handle']];
+
+                    $request->setResponse($response);
+                    $requests[] = $request;
+
+                } while ($remains);
+        }
+
+        return $requests;
     }
 
     function waitResponse()
@@ -92,7 +127,7 @@ class Multi implements \IteratorAggregate, \Countable
 
     function send()
     {
-        $this->sendStart();
+        $this->start();
         $this->waitResponse();
     }
 
