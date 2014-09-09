@@ -66,6 +66,7 @@ class Multi implements \IteratorAggregate, \Countable
 
     /**
      * イベントが発生するのを待って、何かレスポンスが得られればその配列を返す。
+     * これを実行すると、不要になったrequestオブジェクトはdetachします
      *
      * @return Request[]
      */
@@ -91,6 +92,13 @@ class Multi implements \IteratorAggregate, \Countable
                     $request = $this->pool[(int)$raised['handle']];
 
                     $request->setResponse($response);
+                    $this->detach($request);
+
+                    if (CURLE_OK !== $raised['result']) {
+                        $error = new CurlException(curl_error($raised['handle']), $raised['result']);
+                        $request->setError($error);
+                    }
+
                     $requests[] = $request;
 
                 } while ($remains);
