@@ -76,10 +76,10 @@ class Multi implements \IteratorAggregate, \Countable
         $requests = array();
 
         switch (curl_multi_select($mh, $this->timeout)) {
-            case -1:
             case 0:
                 throw new \RuntimeException('timeout?');
 
+            case -1: //全リクエストが完了しているケース
             default:
                 do $stat = curl_multi_exec($mh, $running);
                 while ($stat === \CURLM_CALL_MULTI_PERFORM);
@@ -112,10 +112,10 @@ class Multi implements \IteratorAggregate, \Countable
         $mh = $this->mh;
 
         do switch (curl_multi_select($mh, $this->timeout)) {
-            case -1:
             case 0:
                 throw new \RuntimeException('timeout.');
 
+            case -1: //全リクエストが完了しているケース
             default:
                 do $stat = curl_multi_exec($mh, $running);
                 while ($stat === \CURLM_CALL_MULTI_PERFORM);
