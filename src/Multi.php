@@ -49,7 +49,7 @@ class Multi implements \IteratorAggregate, \Countable
         curl_multi_remove_handle($this->mh, $handle);
     }
 
-    function sendStart()
+    function start()
     {
         $mh = $this->mh;
 
@@ -64,15 +64,58 @@ class Multi implements \IteratorAggregate, \Countable
         } while ($running);
     }
 
+    /**
+     * イベントが発生するのを待って、何かレスポンスが得られればその配列を返す。
+     * これを実行すると、不要になったrequestオブジェクトはdetachします
+     *
+     * @return Request[]
+     */
+    function getFinishedResponses()
+    {
+        $mh = $this->mh;
+        $requests = array();
+
+        switch (curl_multi_select($mh, $this->timeout)) {
+            case 0:
+                throw new \RuntimeException('timeout?');
+
+            case -1: //全リクエストが完了しているケース
+            default:
+                do $stat = curl_multi_exec($mh, $running);
+                while ($stat === \CURLM_CALL_MULTI_PERFORM);
+
+                do if ($raised = curl_multi_info_read($mh, $remains)) {
+                    $info = curl_getinfo($raised['handle']);
+                    $body = curl_multi_getcontent($raised['handle']);
+
+                    $response = new Response($body, $info);
+                    $request = $this->pool[(int)$raised['handle']];
+
+                    $request->setResponse($response);
+                    $this->detach($request);
+
+                    if (CURLE_OK !== $raised['result']) {
+                        $error = new CurlException(curl_error($raised['handle']), $raised['result']);
+                        $request->setError($error);
+                    }
+
+                    $requests[] = $request;
+
+                } while ($remains);
+        }
+
+        return $requests;
+    }
+
     function waitResponse()
     {
         $mh = $this->mh;
 
         do switch (curl_multi_select($mh, $this->timeout)) {
-            case -1:
             case 0:
                 throw new \RuntimeException('timeout.');
 
+            case -1: //全リクエストが完了しているケース
             default:
                 do $stat = curl_multi_exec($mh, $running);
                 while ($stat === \CURLM_CALL_MULTI_PERFORM);
@@ -92,7 +135,7 @@ class Multi implements \IteratorAggregate, \Countable
 
     function send()
     {
-        $this->sendStart();
+        $this->start();
         $this->waitResponse();
     }
 

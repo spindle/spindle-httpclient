@@ -18,6 +18,8 @@ class Request
 
     protected $response;
 
+    protected $error;
+
     function __construct($url = null, array $options = array()) {
         if (is_string($url)) {
             $this->handle = curl_init($url);
@@ -76,6 +78,7 @@ class Request
         if (0 !== $errno) {
             $err = new CurlException(curl_error($this->handle), $errno);
             $err->setRequest($this);
+            $this->error = $err;
             throw $err;
         }
         return $res;
@@ -87,6 +90,14 @@ class Request
 
     function getResponse() {
         return $this->response;
+    }
+
+    function setError(CurlException $err) {
+        $this->error = $err;
+    }
+
+    function getError() {
+        return $this->error;
     }
 
     protected function _toCurlSetopt(array $optionList) {
