@@ -53,15 +53,9 @@ class Multi implements \IteratorAggregate, \Countable
     {
         $mh = $this->mh;
 
-        do switch (curl_multi_select($mh, 0)) {
-            case -1:
-                usleep(10);
-                do $stat = curl_multi_exec($mh, $running);
-                while ($stat === \CURLM_CALL_MULTI_PERFORM);
-                continue 2;
-            default:
-                break 2;
-        } while ($running);
+        do $stat = curl_multi_exec($mh, $running);
+        while ($stat === \CURLM_CALL_MULTI_PERFORM);
+        return curl_multi_select($mh, 0);
     }
 
     /**
@@ -79,7 +73,7 @@ class Multi implements \IteratorAggregate, \Countable
             case 0:
                 throw new \RuntimeException('timeout?');
 
-            case -1: //全リクエストが完了しているケース
+            case -1:
             default:
                 do $stat = curl_multi_exec($mh, $running);
                 while ($stat === \CURLM_CALL_MULTI_PERFORM);
@@ -115,7 +109,7 @@ class Multi implements \IteratorAggregate, \Countable
             case 0:
                 throw new \RuntimeException('timeout.');
 
-            case -1: //全リクエストが完了しているケース
+            case -1:
             default:
                 do $stat = curl_multi_exec($mh, $running);
                 while ($stat === \CURLM_CALL_MULTI_PERFORM);
@@ -128,6 +122,10 @@ class Multi implements \IteratorAggregate, \Countable
                     $request = $this->pool[(int)$raised['handle']];
 
                     $request->setResponse($response);
+                    if (CURLE_OK !== $raised['result']) {
+                        $error = new CurlException(curl_error($raised['handle']), $raised['result']);
+                        $request->setError($error);
+                    }
 
                 } while ($remains);
         } while ($running);
