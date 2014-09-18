@@ -160,7 +160,9 @@ $pool->detach($req1);
 $pool->send();
 ```
 
-`send()`は全てのリクエストを送り、全てのレスポンスが戻ってくるのを待ちますが、これを`sendStart()`と`waitResponse()`の二つに分けて書くと、待っている間に他のコードを実行できます。
+`send()`は全てのリクエストを送り、全てのレスポンスが戻ってくるのを待ちますが、これを`start()`と`waitResponse()`の二つに分けて書くと、待っている間に他のコードを実行できます。
+
+なお、`start()`は失敗することがあり、-1を返します。その場合は何度か実行してみてください。(複数回実行に副作用はありません)
 
 ```php
 use Spindle\HttpClient;
@@ -170,19 +172,18 @@ $pool = new HttpClient\Multi(
     new HttpClient\Request('http://example.com/api2')
 );
 
-$pool->sendStart();
+$pool->start();
 
 for ($i=0; $i<10000; $i++) {
     very_very_heavy_function();
+    $pool->start();
 }
 
 $pool->waitResponse();
 
-foreach ($pool as $url => $req) {
+foreach ($pool as $req) {
     $res = $req->getResponse();
-    echo $url, PHP_EOL;
-    echo $res->getStatusCode(), PHP_EOL
-    echo $res->getBody(), PHP_EOL;
+    echo "{$res->getStatusCode()}\t{$res->getUrl()}\t{$res->getBody()}\n";
 }
 ```
 
